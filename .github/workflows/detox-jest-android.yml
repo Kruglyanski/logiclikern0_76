@@ -44,11 +44,14 @@ jobs:
             "emulator" \
             "system-images;android-34;google_apis;x86_64" \
             "ndk;27.1.12297006"
+            
+      - name: Show available devices (debug)
+        run: $ANDROID_HOME/cmdline-tools/latest/bin/avdmanager list devices
 
       - name: Create Android Emulator
         run: |
           echo "no" | $ANDROID_HOME/cmdline-tools/latest/bin/avdmanager create avd \
-            -n Pixel_7_Pro_API_34 -k "system-images;android-34;google_apis;x86_64" --device "pixel_7_pro"
+            -n Pixel_7_Pro_API_34 -k "system-images;android-34;google_apis;x86_64" --device "pixel"
 
       - name: Cache node modules
         uses: actions/cache@v3
