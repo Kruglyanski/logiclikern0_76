@@ -26,8 +26,6 @@ export const CoursesScreen: FC = () => {
   const listRef = useRef<FlatList<ICourse>>(null);
 
   const filteredCourses = useMemo(() => {
-    console.log('selectedTag', selectedTag);
-    console.log('courses', courses);
     return selectedTag
       ? courses.filter(c => c.tags.includes(selectedTag))
       : courses;

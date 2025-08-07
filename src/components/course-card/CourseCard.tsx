@@ -15,7 +15,7 @@ export const CourseCard: FC<IProps> = React.memo(({course}) => {
       <Image source={{uri: course.image}} style={styles.image} />
       <View style={styles.fakeShadow}>
         <View style={styles.textWrapper}>
-          <Text style={styles.text}>{`course-card-${course.id}`}</Text>
+          <Text style={styles.text}>{course.name}</Text>
         </View>
       </View>
     </View>
