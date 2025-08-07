@@ -1,0 +1,48 @@
+name: Detox + Jest iOS CI
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build-and-test-ios:
+    runs-on: macos-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Install dependencies
+        run: |
+          npm ci
+
+      - name: Install applesimutils
+        run: |
+          brew tap wix/brew
+          brew install applesimutils
+
+      - name: Install pods
+        run: |
+          cd ios
+          pod install
+          cd ..
+
+      - name: Show available iOS simulators
+        run: xcrun simctl list devices
+
+      - name: Build iOS app for testing
+        run: |
+          npx detox build --configuration ios.sim.debug
+
+      - name: Run Jest unit tests
+        run: |
+          npm test
+
+      - name: Run Detox e2e tests
+        run: |
+          npx detox test --configuration ios.sim.debug --cleanup
