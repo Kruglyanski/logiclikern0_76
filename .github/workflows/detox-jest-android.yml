@@ -13,7 +13,7 @@ jobs:
     env:
       ANDROID_HOME: /usr/local/lib/android/sdk
       JAVA_HOME: /usr/lib/jvm/java-17-temurin
-      PATH: /usr/local/lib/android/sdk/platform-tools:/usr/local/lib/android/sdk/emulator:/usr/lib/jvm/java-17-temurin/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+      PATH: /usr/local/lib/android/sdk/platform-tools:/usr/lib/jvm/java-17-temurin/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 
     steps:
       - name: Checkout code
@@ -45,10 +45,10 @@ jobs:
             "system-images;android-34;google_apis;x86_64" \
             "ndk;27.1.12297006"
 
-      - name: Create AVD for Detox
+      - name: Create Android Emulator
         run: |
-          echo "no" | $ANDROID_HOME/cmdline-tools/latest/bin/avdmanager create avd -n Pixel_7_Pro_API_34 -k "system-images;android-34;google_apis;x86_64" --force
-          $ANDROID_HOME/emulator/emulator -list-avds
+          echo "no" | $ANDROID_HOME/cmdline-tools/latest/bin/avdmanager create avd \
+            -n Pixel_7_Pro_API_34 -k "system-images;android-34;google_apis;x86_64" --device "pixel_7_pro"
 
       - name: Cache node modules
         uses: actions/cache@v3
@@ -67,12 +67,27 @@ jobs:
         working-directory: android
         run: ./gradlew assembleDebug assembleAndroidTest -DtestBuildType=debug
 
-      - name: Start Android emulator
+      - name: Start Android Emulator
         run: |
-          nohup $ANDROID_HOME/emulator/emulator -avd Pixel_7_Pro_API_34 -no-snapshot-load -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim &
-          # Ждем, пока эмулятор полностью запустится
+          nohup $ANDROID_HOME/emulator/emulator -avd Pixel_7_Pro_API_34 \
+            -no-snapshot-load -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -accel off &
+
+      - name: Wait for Emulator to Boot
+        run: |
           adb wait-for-device
-          adb shell getprop sys.boot_completed | grep '1'
+          boot_completed=""
+          attempts=0
+          while [[ "$boot_completed" != "1" && $attempts -lt 30 ]]; do
+            sleep 5
+            boot_completed=$(adb shell getprop sys.boot_completed | tr -d '\r')
+            echo "Waiting for emulator to boot... ($attempts)"
+            ((attempts++))
+          done
+          if [[ "$boot_completed" != "1" ]]; then
+            echo " Emulator failed to boot in time"
+            exit 1
+          fi
+          echo "✅ Emulator booted"
 
       - name: Run Jest tests
         run: npm test
