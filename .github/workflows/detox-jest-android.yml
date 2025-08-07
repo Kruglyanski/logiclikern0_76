@@ -9,8 +9,6 @@ on:
 jobs:
   build-and-test:
     runs-on: ubuntu-22.04
-    env:
-      ANDROID_SDK_ROOT: ${{ runner.tool_cache }}/android-sdk
 
     steps:
       - name: Checkout code
