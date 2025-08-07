@@ -3,7 +3,11 @@ import { device, element, by, expect, waitFor } from 'detox';
 describe('Courses Screen E2E', () => {
   beforeAll(async () => {
     await device.launchApp({ newInstance: true });
+    await new Promise(res => setTimeout(res, 5000));
+    await device.takeScreenshot('before-tests');
   });
+
+
 
   it('показывает все курсы по умолчанию', async () => {
     await waitFor(element(by.id('course-card-course:1'))).toBeVisible().withTimeout(10000);
