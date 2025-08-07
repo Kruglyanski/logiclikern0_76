@@ -51,8 +51,7 @@ export const SelectorModal: FC<IProps> = ({
     <Modal
       testID={testID}
       visible={isVisible}
-      onRequestClose={onClose}
-      supportedOrientations={SUPPORTED_ORIENTATIONS}>
+      onRequestClose={onClose}>
       <View style={styles.container}>
         <View style={styles.header}>
           <View style={styles.placeholderView} />
