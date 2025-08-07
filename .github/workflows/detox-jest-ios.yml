@@ -46,3 +46,9 @@ jobs:
       - name: Run Detox e2e tests
         run: |
           npx detox test --configuration ios.sim.debug --cleanup
+
+      - name: Upload Detox Artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: detox-artifacts
+          path: artifacts/

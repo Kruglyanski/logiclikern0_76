@@ -1,5 +1,13 @@
 /** @type {Detox.DetoxConfig} */
 module.exports = {
+  artifacts: {
+    rootDir: "artifacts",
+    plugins: {
+      screenshot: {
+        shouldTakeAutomaticSnapshots: true
+      }
+    }
+  },
   testRunner: {
     args: {
       '$0': 'jest',
