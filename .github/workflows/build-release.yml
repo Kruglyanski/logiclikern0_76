@@ -1,10 +1,11 @@
-name: Detox + Jest Android CI
+name: Build Android Release APK
 
+# Запускать только вручную
 on:
   workflow_dispatch:
 
 jobs:
-  build-and-test:
+  build-release:
     runs-on: ubuntu-22.04
 
     env:
@@ -55,9 +56,12 @@ jobs:
       - name: Install npm dependencies
         run: npm ci
 
-      - name: Build Android Debug and Test APKs
+      - name: Build Release APK
         working-directory: android
-        run: ./gradlew assembleDebug assembleAndroidTest -DtestBuildType=debug
+        run: ./gradlew assembleRelease
 
-      - name: Run Jest tests
-        run: npm test
+      - name: Upload APK Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: release-apk
+          path: android/app/build/outputs/apk/release/app-release.apk
