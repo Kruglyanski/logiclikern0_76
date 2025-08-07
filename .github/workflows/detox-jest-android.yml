@@ -45,14 +45,6 @@ jobs:
             "system-images;android-34;google_apis;x86_64" \
             "ndk;27.1.12297006"
 
-      - name: Show available devices (debug)
-        run: $ANDROID_HOME/cmdline-tools/latest/bin/avdmanager list devices
-
-      - name: Create Android Emulator
-        run: |
-          echo "no" | $ANDROID_HOME/cmdline-tools/latest/bin/avdmanager create avd \
-            -n Pixel_7_Pro_API_34 -k "system-images;android-34;google_apis;x86_64" --device "pixel"
-
       - name: Cache node modules
         uses: actions/cache@v3
         with:
@@ -63,40 +55,12 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-node-
 
-      # - name: Install npm dependencies
-      #   run: npm ci
+      - name: Install npm dependencies
+        run: npm ci
 
-      # - name: Build Android Debug and Test APKs
-      #   working-directory: android
-      #   run: ./gradlew assembleDebug assembleAndroidTest -DtestBuildType=debug
+      - name: Build Android Debug and Test APKs
+        working-directory: android
+        run: ./gradlew assembleDebug assembleAndroidTest -DtestBuildType=debug
 
-      #      - name: Start Android Emulator
-      #   run: |
-      #     nohup $ANDROID_HOME/emulator/emulator -avd Pixel_7_Pro_API_34 \
-      #       -no-snapshot-load -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim > emulator.log 2>&1 &
-
-      - name: Wait for Emulator to Boot
-        run: |
-          adb wait-for-device
-          boot_completed=""
-          attempts=0
-          max_attempts=60  # увеличено с 30 до 60
-          while [[ "$boot_completed" != "1" && $attempts -lt $max_attempts ]]; do
-            sleep 5
-            boot_completed=$(adb shell getprop sys.boot_completed | tr -d '\r')
-            echo "Waiting for emulator to boot... ($attempts)"
-            ((attempts++))
-          done
-          if [[ "$boot_completed" != "1" ]]; then
-            echo "🚨 Emulator failed to boot in time"
-            echo "Last 50 lines of emulator log:"
-            tail -n 50 emulator.log
-            exit 1
-          fi
-          echo "✅ Emulator booted"
-
-      # - name: Run Jest tests
-      #   run: npm test
-
-      # - name: Run Detox tests
-      #   run: npx detox test --configuration android.emu.debug --cleanup
+      - name: Run Jest tests
+        run: npm test
