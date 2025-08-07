@@ -11,9 +11,9 @@ jobs:
     runs-on: ubuntu-22.04
 
     env:
-      ANDROID_SDK_ROOT: ${{ runner.tool_cache }}/android-sdk
+      ANDROID_SDK_ROOT: /usr/lib/android-sdk
       JAVA_HOME: /usr/lib/jvm/java-11-temurin
-      PATH: ${{ runner.tool_cache }}/android-sdk/platform-tools:${JAVA_HOME}/bin:${PATH}
+      PATH: /usr/lib/android-sdk/platform-tools:/usr/lib/jvm/java-11-temurin/bin:${{ env.PATH }}
 
     steps:
       - name: Checkout code
