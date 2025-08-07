@@ -11,9 +11,9 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      ANDROID_SDK_ROOT: ${{ env.ANDROID_SDK_ROOT }}
-      ANDROID_HOME: ${{ env.ANDROID_SDK_ROOT }}
-      PATH: ${{ env.ANDROID_SDK_ROOT }}/cmdline-tools/latest/bin:$PATH
+      ANDROID_SDK_ROOT: $HOME/Android/Sdk
+      ANDROID_HOME: $HOME/Android/Sdk
+      PATH: $HOME/Android/Sdk/cmdline-tools/latest/bin:$HOME/Android/Sdk/platform-tools:$PATH
 
     steps:
       - name: Checkout code
@@ -30,23 +30,20 @@ jobs:
           distribution: 'temurin'
           java-version: 11
 
-      - name: Setup Android SDK environment variable
-        run: echo "ANDROID_SDK_ROOT=$HOME/Android/Sdk" >> $GITHUB_ENV
-
       - name: Install Android SDK cmdline-tools
         run: |
-          mkdir -p $HOME/Android/Sdk/cmdline-tools
-          curl -o sdk-tools.zip https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip
-          unzip sdk-tools.zip -d $HOME/Android/Sdk/cmdline-tools
-          mv $HOME/Android/Sdk/cmdline-tools/cmdline-tools $HOME/Android/Sdk/cmdline-tools/latest
-          rm sdk-tools.zip
+          mkdir -p $ANDROID_SDK_ROOT/cmdline-tools
+          cd $ANDROID_SDK_ROOT/cmdline-tools
+          wget https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip -O cmdline-tools.zip
+          unzip cmdline-tools.zip
+          rm cmdline-tools.zip
+          mv cmdline-tools latest
 
       - name: Accept Android SDK licenses
-        run: yes | $HOME/Android/Sdk/cmdline-tools/latest/bin/sdkmanager --licenses
+        run: yes | sdkmanager --licenses
 
       - name: Install Android SDK packages
-        run: |
-          $HOME/Android/Sdk/cmdline-tools/latest/bin/sdkmanager "platform-tools" "platforms;android-34" "build-tools;34.0.0" "emulator"
+        run: sdkmanager "platform-tools" "platforms;android-34" "build-tools;34.0.0" "emulator"
 
       - name: Cache node modules
         uses: actions/cache@v3
@@ -58,14 +55,14 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-node-
 
-      - name: Install npm dependencies
+      - name: Install dependencies
         run: npm ci
 
-      - name: Build Android Debug APK and Test APK
+      - name: Build Android Debug and Test APKs
         run: cd android && ./gradlew assembleDebug assembleAndroidTest -DtestBuildType=debug
 
       - name: Run Jest tests
         run: npm run test
 
-      - name: Run Detox tests (Debug)
-        run: npm run e2e:android:debug
+      - name: Run Detox tests
+        run: npm run e2e:android
