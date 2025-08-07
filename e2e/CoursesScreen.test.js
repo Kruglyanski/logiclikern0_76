@@ -10,7 +10,10 @@ describe('Courses Screen E2E', () => {
 
 
   it('показывает все курсы по умолчанию', async () => {
-    await waitFor(element(by.id('course-card-course:1'))).toBeVisible().withTimeout(10000);
+    await waitFor(element(by.id('course-card-course:1'))).toBeVisible().withTimeout(10000).catch(async () => {
+      await device.dumpHierarchy();
+      throw new Error('Элемент не найден, иерархия выведена');
+    });;
     await expect(element(by.id('course-card-course:1'))).toBeVisible();
     // await expect(element(by.id('course-card-course:2'))).toBeVisible();
     await expect(element(by.id('course-card-course:3'))).not.toBeVisible();
