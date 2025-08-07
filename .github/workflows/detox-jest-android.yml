@@ -8,19 +8,13 @@ on:
 
 jobs:
   build-and-test:
-    runs-on: ubuntu-22.04  # явно указали стабильный runner
-
+    runs-on: ubuntu-22.04
     env:
-      ANDROID_SDK_ROOT: /usr/lib/android-sdk
+      ANDROID_SDK_ROOT: ${{ runner.tool_cache }}/android-sdk
 
     steps:
-      - name: Check if tar is available
-        run: |
-          which tar
-          tar --version
-
       - name: Checkout code
-        uses: actions/checkout@v2  # старая версия checkout, часто стабильнее
+        uses: actions/checkout@v3
 
       - name: Setup Node.js
         uses: actions/setup-node@v3
@@ -33,12 +27,12 @@ jobs:
           distribution: 'temurin'
           java-version: 11
 
-      - name: Install Android SDK components
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y openjdk-11-jdk unzip wget
-          yes | sdkmanager --licenses || true
-          sdkmanager "platform-tools" "platforms;android-33" "build-tools;33.0.2" "emulator"
+      - name: Setup Android SDK
+        uses: react-native-community/setup-android@v2
+        with:
+          api-levels: 34
+          build-tools: 34.0.0
+          ndk-version: 27.1.12297006
 
       - name: Cache node modules
         uses: actions/cache@v3
@@ -58,3 +52,6 @@ jobs:
 
       - name: Run Jest tests
         run: npm run test
+
+      - name: Run Detox tests
+        run: npm run detox:test:android
